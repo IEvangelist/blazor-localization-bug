@@ -1,0 +1,39 @@
+﻿@page "/counter"
+@inject IStringLocalizer<Counter> Localizer
+@inject ILogger<Counter> Log
+
+<h1>Counter</h1>
+
+<p role="status">@TryLocalize("CountFormat", currentCount)</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">
+    @TryLocalize("ClickMe")
+</button>
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+        private LocalizedString TryLocalize(string key, params object[] arguments)
+    {
+        LocalizedString localizedString = arguments is not null and { Length: > 0 }
+            ? Localizer[key, arguments]
+            : Localizer[key];
+
+        if (localizedString.ResourceNotFound)
+        {
+            Log.LogError(
+                "Unable to find resource - Name:{Name}, Searched in:{Loc}, Value: {Val}",
+                localizedString.Name,
+                localizedString.SearchedLocation,
+                localizedString.Value);
+        }
+
+        return localizedString;
+    }
+}
